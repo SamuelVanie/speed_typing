@@ -20,6 +20,8 @@ fn main() {
 
 pub struct TextPlugin;
 
+const FONT_SIZE: f32 = 30.0;
+
 impl Plugin for TextPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<ScreenText>()
@@ -99,51 +101,30 @@ pub fn update_text(
     }
 }
 
-fn char_width(c: char, font_size: f32) -> f32 {
-    // May need to adjust this based on your font and size
-    // This is a rough estimate assuming a monospaced font
-    // May need a more accurate measurement based on your actual font
-    (c as u32).count_ones() as f32 * font_size
-}
 
 pub fn draw_text(
     mut commands: Commands,
     screen_txt: Res<ScreenText>,
-    window_query: Query<&Window, With<PrimaryWindow>>,
+    mut query: Query<(Entity, &Text)>,
 ) {
-    let mut x = 0.0;
-    let mut y = 0.0;
-    let margin = 10.0;
-    let font_size = (50.0, 50.0);
-    let window = window_query.get_single().unwrap();
 
-    for c in screen_txt.0.iter() {
-        let char_width = char_width(c.text, font_size.0);
-        if x + char_width <= (window.width() - margin) {
-            commands.spawn((TextBundle::from_section(
-                c.text.to_string(),
-                TextStyle {
-                    font_size: font_size.0,
+    for (entity, _) in query.iter_mut() {
+        commands.entity(entity).despawn();
+    }
+    
+    commands.spawn(TextBundle::from_sections(
+        screen_txt.0.iter().map(|c| {
+            TextSection {
+                value: c.text.to_string(),
+                style: TextStyle {
+                    font_size: FONT_SIZE,
                     color: c.color,
                     ..Default::default()
                 },
-            )
-            .with_text_alignment(TextAlignment::Left)
-            .with_text_alignment(TextAlignment::Center)
-            .with_style(Style {
-                position_type: PositionType::Absolute,
-                bottom: Val::Px(y + 5.0),
-                right: Val::Px(window.width() - x - char_width - margin), // Adjust position based on available space
-                ..Default::default()
-            }),));
+            }
+        }).collect::<Vec<_>>()
+    ));
 
-            x += char_width;
-        } else {
-            // Move to the next line
-            x = 0.0;
-            y += font_size.0;
-        }
-    }
 }
 
 pub fn spawn_camera(mut commands: Commands, window_query: Query<&Window, With<PrimaryWindow>>) {
