@@ -1,7 +1,7 @@
 use bevy::{prelude::*, window::PrimaryWindow};
 
 mod text;
-use text::TextPlugin;
+mod decor;
 
 fn main() {
     App::new()
@@ -17,15 +17,6 @@ fn main() {
             ..default()
         }))
         .add_systems(Startup, spawn_camera)
-        .add_plugins(TextPlugin)
+        .add_plugins(text::TextPlugin)
         .run();
-}
-
-pub fn spawn_camera(mut commands: Commands, window_query: Query<&Window, With<PrimaryWindow>>) {
-    let window = window_query.get_single().unwrap();
-
-    commands.spawn(Camera2dBundle {
-        transform: Transform::from_xyz(window.width() / 2.0, window.height() / 2.0, 100.0),
-        ..default()
-    });
 }

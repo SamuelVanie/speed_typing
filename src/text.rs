@@ -70,7 +70,7 @@ pub fn update_text(
 ) {
     let current_char = screen_txt.0.get_mut(current_char_index.0).unwrap();
     for c in input.iter() {
-        if c.char == current_char.text {
+        if c.char == current_char.text || (c.char == ' ' && current_char.text == '_') {
             current_char.color = get_color(CharColor::CORRECT);
             current_char_index.0 += 1;
         } else if typed.just_pressed(KeyCode::Back) {
